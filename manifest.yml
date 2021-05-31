@@ -1,5 +1,5 @@
 applications:
-- name: ygbety-iot
+- name: tjbot-phone-oh
   buildpacks:
   - staticfile_buildpack
   memory: 30M
