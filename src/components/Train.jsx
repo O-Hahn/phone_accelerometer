@@ -22,8 +22,8 @@ export default function Train () {
     const classes = useStyles();
     const [recording, setRecording] = React.useState(false);
     const [orgId, setOrgId] = React.useState("dzeik8");
-    const [devType, setDevType] = React.useState("raspi");
-    const [devId, setDevId] = React.useState("raspi-sim");
+    const [devType, setDevType] = React.useState("phone");
+    const [devId, setDevId] = React.useState("phone-app");
     const [eventType, setEventType] = React.useState("motion");
     const [token, setToken] = React.useState("");
     const [key, setKey] = React.useState("");
