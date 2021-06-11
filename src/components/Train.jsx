@@ -100,6 +100,14 @@ export default function Train () {
 
     useEffect(() => {
         console.log("Use effect");  
+        
+        DeviceMotionEvent.requestPermission().then(response => {
+            if (response == 'granted') {
+                console.log("accelerometer permission granted");
+                // Do stuff here
+            }
+        });
+
         window.addEventListener('devicemotion', handleAcceleration);
         if (sendOrientation) {
             window.addEventListener('deviceorientation', handleOrientation);
