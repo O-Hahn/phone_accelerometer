@@ -77,17 +77,22 @@ export default function Score () {
         console.log("recording started")
     };
 
+    const handleSend = () => {
+        console.log("Send");
+        scoreData(dataObj);
+        console.log("sending")
+    };
+
     const handleStop = () => {
         console.log("Stop");
         setRecording(false);
         console.log("recording stopped")
         console.log(dataObj);
-        scoreData(dataObj);
     };
 
     const scoreData = (data) => {
 
-        var url = "https://nr-starter-oh.eu-de.mybluemix.net/score_motion";
+        var url = nodeRedUrl;
 
         console.log("sending to: " + url);
         var input = {
@@ -179,6 +184,18 @@ export default function Score () {
                 </Button>
                 </div>
             )}
+            <div>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    className={classes.button}
+                    startIcon={<PlayCircleOutlineIcon/>}
+                    onClick={handleSend}
+                >
+                    Send
+                </Button>
+                </div>
+
             </Grid>
             {pred ? (<Typography>Prediction: {pred}</Typography>) : (<div/>)}
         </div>
