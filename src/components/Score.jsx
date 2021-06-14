@@ -24,7 +24,7 @@ export default function Score () {
 
     const [recording, setRecording] = React.useState(false);
     const [motionset, setMotionset] = React.useState("");
-    const [nodeRedUrl, setNodeRedUrl] = React.useState("ttps://node-red-fhbgld-2021-05-14.eu-de.mybluemix.net/score_motion");
+    const [nodeRedUrl, setNodeRedUrl] = React.useState("https://nr-starter-oh.eu-de.mybluemix.net/score_motion");
     const [dataObj, setDataObj] = React.useState({dataArray: []});
     const [pred, setPred] = React.useState(null);
 
