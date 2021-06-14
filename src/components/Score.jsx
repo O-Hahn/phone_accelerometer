@@ -87,7 +87,7 @@ export default function Score () {
 
     const scoreData = (data) => {
 
-        var url = "https://node-red-fhbgld-2021-05-14.eu-de.mybluemix.net/score_motion";
+        var url = "https://nr-starter-oh.eu-de.mybluemix.net/score_motion";
 
         console.log("sending to: " + url);
         var input = {
@@ -113,7 +113,17 @@ export default function Score () {
     }
 
     useEffect(() => {
-        console.log("Use effect");  
+        console.log("Use effect");
+          
+        if ( typeof( DeviceMotionEvent ) !== "undefined" && typeof( DeviceMotionEvent.requestPermission ) === "function" ) {
+            DeviceMotionEvent.requestPermission().then(response => {
+                if (response === 'granted') {
+                    console.log("accelerometer permission granted");
+                    // Do stuff here
+                }
+            });  
+        }
+
         window.addEventListener('devicemotion', handleAcceleration);
         if (sendOrientation) {
             window.addEventListener('deviceorientation', handleOrientation);
