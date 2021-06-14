@@ -208,7 +208,7 @@ export default function Score () {
                 >
                     Send
                 </Button>
-                </div>
+            </div>
 
             </Grid>
             {pred ? (<Typography>Prediction: {pred}</Typography>) : (<div/>)}
