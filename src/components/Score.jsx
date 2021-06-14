@@ -5,6 +5,10 @@ import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline';
 import axios from "axios";
 
+function sleep(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
 const useStyles = makeStyles((theme) => ({
     button: {
       margin: theme.spacing(1),
@@ -44,7 +48,12 @@ export default function Score () {
                     z: event.acceleration.z
                 },
             };
-            setDataObj({ dataArray: [...dataObj.dataArray, data]});
+            
+            (async()=>{
+                setDataObj({ dataArray: [...dataObj.dataArray, data]});
+                await sleep(100);
+                //Do some more stuff
+              })()
         }
     }
 
