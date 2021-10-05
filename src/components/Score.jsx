@@ -1,9 +1,11 @@
 import React, { useEffect } from "react";
 import { makeStyles } from '@material-ui/core/styles';
-import { Box, Button, Divider, Grid, TextField, Typography } from "@material-ui/core";
+import { Box, Button, Divider, FormLabel, Grid, TextField, Typography } from "@material-ui/core";
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline';
-import axios from "axios";
+import SendIcon from '@material-ui/icons/Send';
+import { useDispatch, useSelector } from "react-redux";
+import { addDataObj, setDataObj, setDelay, setPred, setScoreUrl, triggerScoring } from "../redux/ducks/ScoreReducer";
 
 function sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -23,14 +25,17 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Score () {
     const classes = useStyles();
+    const dispatch = useDispatch();
 
     const sendOrientation = process.env.REACT_APP_ORIENTATION === 'true' ? true : false;
 
     const [recording, setRecording] = React.useState(false);
     const [motionset, setMotionset] = React.useState("");
-    const [nodeRedUrl, setNodeRedUrl] = React.useState("https://nr-starter-oh.eu-de.mybluemix.net/score_motion");
-    const [dataObj, setDataObj] = React.useState({dataArray: []});
-    const [pred, setPred] = React.useState(null);
+
+    const nodeRedUrl = useSelector((state) => state.score.scoreUrl);
+    const pred = useSelector((state) => state.score.pred);
+    const dataObj = useSelector((state) => state.score.dataObj);
+    const delay = useSelector((state) => state.score.delay);
 
     const handleAcceleration = (event) => {
         console.log("Handle acceleration")
@@ -48,12 +53,15 @@ export default function Score () {
                     z: event.acceleration.z
                 },
             };
-            
-            (async()=>{
-                setDataObj({ dataArray: [...dataObj.dataArray, data]});
-                await sleep(100);
-                //Do some more stuff
-            })()
+            if (dataObj.dataArray.at(-1)) {
+                console.log("last " + dataObj.dataArray.at(-1).timestamp);
+                let timeDiff = now - dataObj.dataArray.at(-1).timestamp;
+                if (timeDiff > delay) {
+                    dispatch(addDataObj(data));
+                }
+            } else {
+                dispatch(addDataObj(data));
+            }
         }
     }
 
@@ -73,12 +81,16 @@ export default function Score () {
                     gamma: event.gamma
                 },
             };
-            
-            (async()=>{
-                setDataObj({ dataArray: [...dataObj.dataArray, data]});
-                await sleep(100);
-                //Do some more stuff
-            })()
+            console.log(dataObj.dataArray.at(-1))
+            if (dataObj.dataArray.at(-1)) {
+                console.log("last " + dataObj.dataArray.at(-1).timestamp);
+                let timeDiff = now - dataObj.dataArray.at(-1).timestamp;
+                if (timeDiff > delay) {
+                    dispatch(addDataObj(data));
+                }
+            } else {
+                dispatch(addDataObj(data));
+            }
         }
     }
 
@@ -87,7 +99,10 @@ export default function Score () {
         let now = new Date();
         setMotionset(now.toISOString());
         setRecording(true);
-        setPred(null);
+        dispatch(setDataObj({
+            dataArray:[]
+        }))
+        dispatch(setPred(null));
         console.log("recording started")
     };
 
@@ -101,39 +116,15 @@ export default function Score () {
         console.log("Stop");
         setRecording(false);
         console.log("recording stopped")
-        console.log(dataObj);
     };
 
-    const scoreData = (data) => {
-
-        var url = nodeRedUrl;
-
-        console.log("sending to: " + url);
-        var input = {
-            "input_data": [
-                {
-                    "values": [...data.dataArray],
-                }
-            ],
-        };
-        console.log(input);
-        axios.request({
-            method: "POST",
-            url: url,
-            data: input,
-            headers: { "Content-Type": "application/json",
-                        "Accept": "application/json" },
-
-        }).then(resp => {
-            console.log("response:");
-            console.log(resp.data.predictions[0].values[0]);
-            setPred(resp.data.predictions[0].values[0]);
-        });
-    }
+    const handleSend = () => {
+        console.log("Send");
+        dispatch(triggerScoring());
+    };
 
     useEffect(() => {
-        console.log("Use effect");
-          
+        console.log("Use effect");  
         if ( typeof( DeviceMotionEvent ) !== "undefined" && typeof( DeviceMotionEvent.requestPermission ) === "function" ) {
             DeviceMotionEvent.requestPermission().then(response => {
                 if (response === 'granted') {
@@ -142,7 +133,6 @@ export default function Score () {
                 }
             });  
         }
-
         window.addEventListener('devicemotion', handleAcceleration);
         if (sendOrientation) {
             window.addEventListener('deviceorientation', handleOrientation);
@@ -158,18 +148,27 @@ export default function Score () {
 
     return (
         <div>
-            <Grid m={2} justify="center" alignItems="center">
+            <Grid m={2} justifyContent="center" alignItems="center">
             <TextField
                 required
                 id="nrUrl"
                 label="Node Red URL"
                 value={nodeRedUrl}
                 className={classes.textField}
-                onChange={(e) => { setNodeRedUrl(e.target.value); }}
+                onChange={(e) => { dispatch(setScoreUrl(e.target.value)) }}
+            />
+            <TextField
+                required
+                type="number"
+                id="delay"
+                label="Delay between data points"
+                value={delay}
+                className={classes.textField}
+                onChange={(e) => { dispatch(setDelay(e.target.value)) }}
             />
 
             <Box p={2}><Divider/></Box>
-            <Grid item justify="center">
+            <Grid item justifyContent="center">
             </Grid>
             <Typography>Sensor Data Transfer</Typography>
             {recording ? (
@@ -203,15 +202,34 @@ export default function Score () {
                     variant="contained"
                     color="primary"
                     className={classes.button}
-                    startIcon={<PlayCircleOutlineIcon/>}
+                    startIcon={<SendIcon/>}
                     onClick={handleSend}
                 >
                     Send
                 </Button>
-            </div>
-
+                </div>
             </Grid>
-            {pred ? (<Typography>Prediction: {pred}</Typography>) : (<div/>)}
+            {pred && (<Typography>Prediction: {pred}</Typography>)}
+            {dataObj && (
+                <Box mt={2}>
+                    <Grid container alignItems="center">
+                        <FormLabel>Number of events recorded: </FormLabel>
+                        <Box ml={1}><Typography>{dataObj.dataArray.length}</Typography></Box>
+                    </Grid>
+                    <Box mt={1}>
+                    <TextField
+                        multiline
+                        fullWidth
+                        label="Data Object"
+                        rows={10}
+                        variant="outlined"
+                        value={JSON.stringify(dataObj, null, 2) }
+                    >
+
+                    </TextField>
+                    </Box>
+                </Box>
+            )}
         </div>
     );
 }

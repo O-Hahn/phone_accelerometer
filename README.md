@@ -1,12 +1,19 @@
-# Read and transfer device accelerometer data
+# Read and transfer device accelerometer data - Version 2
 
 The application was created by  
 `npx create-react-app phone_accelerometer`
 
 Material UI  
 `npm install @material-ui/core`
-`npm install @material-ui/icons`
+`npm install @material-ui/icons` 
+
+Axios - HTTP request for React 
 `npm install axios`
+
+Redux state management  
+`npm install react-redux`  
+`npm install redux-saga` 
+see also: https://github.com/erikras/ducks-modular-redux
 
 # Node Red Scoring Flow
 In order to send data from a browser to a Node Red http input node, Node Red has to be configured to reply to CORS requests from the browser:
@@ -36,7 +43,8 @@ In order to send data from a browser to a Node Red http input node, Node Red has
     `npm run build`  
     - add a deploy stage, deployer type Cloud Foundry  
     **NOTE:** change the `-name: XXX-iot` in the `manifest.yml` file to your IOT organization name -> this will be the first part of the application URL!!!
-    add at the end of the deploy script:  
+    replace the deploy script with:  
+    `#!/bin/bash`  
     `cp -v Staticfile build &&`  
     `cp -v manifest.yml build &&`  
     `cd build &&`  
