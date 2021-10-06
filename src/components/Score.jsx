@@ -106,12 +106,6 @@ export default function Score () {
         console.log("recording started")
     };
 
-    const handleSend = () => {
-        console.log("Send");
-        scoreData(dataObj);
-        console.log("sending")
-    };
-
     const handleStop = () => {
         console.log("Stop");
         setRecording(false);
